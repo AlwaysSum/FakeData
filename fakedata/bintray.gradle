@@ -1,0 +1,85 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+// This is the library version used when deploying the artifact
+group = PROJ_GROUP
+version = PROJ_VERSION
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                description PROJ_DESCRIPTION
+
+                // Add your description here
+                name PROJ_POM_NAME
+                artifactId PROJ_NAME
+                url PROJ_WEBSITEURL
+
+                // Set your license
+                licenses {
+                    license {
+                        name PROJ_LICENCE_NAME
+                    }
+                }
+                developers {
+                    developer {
+                        id DEVELOPER_ID
+                        name DEVELOPER_NAME
+                        email DEVELOPER_EMAIL
+                    }
+                }
+                scm {
+                    connection PROJ_VCSURL
+                    developerConnection PROJ_VCSURL
+                    url PROJ_WEBSITEURL
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    group "artifacts"
+    from android.sourceSets.main.java.srcDirs //源码路径
+    classifier = 'sources' //文件名后缀
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    failOnError = false
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    javadoc.options.encoding("UTF-8")
+    group "artifacts"
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+bintray {
+    user = BINTRAY_USER
+    key = BINTRAY_APIKEY
+
+    configurations = ['archives']
+    pkg {
+        repo = "FakeData"
+        name = PROJ_NAME
+        websiteUrl = PROJ_WEBSITEURL
+        vcsUrl = PROJ_VCSURL
+        licenses = ["Apache-2.0"]
+        publish = true
+        version {
+            desc = PROJ_DESCRIPTION
+//            gpg {
+//                sign = true //Determines whether to GPG sign the files. The default is false
+//                passphrase = BINTRAY_GPG_PASSWORD
+//                //Optional. The passphrase for GPG signing'
+//            }
+        }
+    }
+}
